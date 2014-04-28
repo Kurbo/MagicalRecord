@@ -84,7 +84,10 @@ static NSString * const kMagicalRecordNSManagedObjectContextWorkingName = @"kNSM
     defaultManagedObjectContext_ = moc;
     [defaultManagedObjectContext_ MR_setWorkingName:@"DEFAULT"];
     
-    if ((defaultManagedObjectContext_ != nil) && ([self MR_rootSavingContext] != nil)) {
+    if (defaultManagedObjectContext_ == nil) {
+        [[NSNotificationCenter defaultCenter] removeObserver:self name:NSManagedObjectContextDidSaveNotification object:[self MR_rootSavingContext]];
+        
+    } else if ([self MR_rootSavingContext] != nil) {
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(rootContextChanged:)
                                                      name:NSManagedObjectContextDidSaveNotification
