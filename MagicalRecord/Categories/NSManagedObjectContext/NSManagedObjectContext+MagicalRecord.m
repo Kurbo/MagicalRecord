@@ -10,6 +10,7 @@
 
 static NSManagedObjectContext *rootSavingContext = nil;
 static NSManagedObjectContext *defaultManagedObjectContext_ = nil;
+static NSManagedObjectContext *workerManagedObjectContext_ = nil;
 static id iCloudSetupNotificationObserver = nil;
 
 static NSString * const kMagicalRecordNSManagedObjectContextWorkingName = @"kNSManagedObjectContextWorkingName";
@@ -21,6 +22,8 @@ static NSString * const kMagicalRecordNSManagedObjectContextWorkingName = @"kNSM
 + (void) MR_setDefaultContext:(NSManagedObjectContext *)moc;
 + (void) MR_setRootSavingContext:(NSManagedObjectContext *)context;
 
+- (void) MR_setWorkingName:(NSString *)MR_workingName;
+
 @end
 
 
@@ -28,6 +31,7 @@ static NSString * const kMagicalRecordNSManagedObjectContextWorkingName = @"kNSM
 
 + (void) MR_cleanUp;
 {
+    [self MR_setWorkerContext:nil];
     [self MR_setDefaultContext:nil];
     [self MR_setRootSavingContext:nil];
 }
@@ -143,7 +147,7 @@ static NSString * const kMagicalRecordNSManagedObjectContextWorkingName = @"kNSM
     MRLog(@"Set Root Saving Context: %@", rootSavingContext);
 }
 
-+ (void) MR_initializeDefaultContextWithCoordinator:(NSPersistentStoreCoordinator *)coordinator;
++ (void) MR_initializeContextsWithCoordinator:(NSPersistentStoreCoordinator *)coordinator;
 {
     if (defaultManagedObjectContext_ == nil)
     {
@@ -153,17 +157,19 @@ static NSString * const kMagicalRecordNSManagedObjectContextWorkingName = @"kNSM
         NSManagedObjectContext *defaultContext = [self MR_newMainQueueContext];
         [self MR_setDefaultContext:defaultContext];
         
+        NSManagedObjectContext *workerContext = [self MR_context];
+        [self MR_setWorkerContext:workerContext];
+        
         [defaultContext setParentContext:rootContext];
     }
 }
 
 + (void) MR_resetDefaultContext
 {
-    void (^resetBlock)(void) = ^{
-        [[NSManagedObjectContext MR_defaultContext] reset];
-    };
-    
-    dispatch_async(dispatch_get_main_queue(), resetBlock);
+    NSManagedObjectContext *context = [NSManagedObjectContext MR_defaultContext];
+    [context performBlock:^{
+        [context reset];
+    }];
 }
 
 + (NSManagedObjectContext *) MR_contextWithoutParent;
@@ -251,5 +257,41 @@ static NSString * const kMagicalRecordNSManagedObjectContextWorkingName = @"kNSM
     return workingName;
 }
 
++ (void)defaultContextChanged:(NSNotification *)notification {
+    [[self MR_workerContext] performBlock:^{
+        [[self MR_workerContext] mergeChangesFromContextDidSaveNotification:notification];
+    }];
+}
+
++ (NSManagedObjectContext *) MR_workerContext
+{
+	@synchronized (self)
+	{
+        return workerManagedObjectContext_;
+	}
+}
+
++ (void) MR_setWorkerContext:(NSManagedObjectContext *)moc
+{
+    if (workerManagedObjectContext_)
+    {
+        [[NSNotificationCenter defaultCenter] removeObserver:workerManagedObjectContext_];
+    }
+    
+    workerManagedObjectContext_ = moc;
+    [workerManagedObjectContext_ MR_setWorkingName:@"WORKER"];
+    
+    if (workerManagedObjectContext_ == nil) {
+        [[NSNotificationCenter defaultCenter] removeObserver:self name:NSManagedObjectContextDidSaveNotification object:[self MR_defaultContext]];        
+    } else if ([self MR_defaultContext] != nil) {
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(defaultContextChanged:)
+                                                     name:NSManagedObjectContextDidSaveNotification
+                                                   object:[self MR_defaultContext]];
+    }
+    
+    [moc MR_obtainPermanentIDsBeforeSaving];
+    MRLog(@"Set Default Context: %@", workerManagedObjectContext_);
+}
 
 @end

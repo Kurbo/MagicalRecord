@@ -30,7 +30,7 @@
 	NSPersistentStoreCoordinator *coordinator = [NSPersistentStoreCoordinator MR_coordinatorWithSqliteStoreNamed:storeName];
     [NSPersistentStoreCoordinator MR_setDefaultStoreCoordinator:coordinator];
 	
-    [NSManagedObjectContext MR_initializeDefaultContextWithCoordinator:coordinator];
+    [NSManagedObjectContext MR_initializeContextsWithCoordinator:coordinator];
 }
 
 + (void) setupCoreDataStackWithAutoMigratingSqliteStoreNamed:(NSString *)storeName
@@ -40,7 +40,7 @@
     NSPersistentStoreCoordinator *coordinator = [NSPersistentStoreCoordinator MR_coordinatorWithAutoMigratingSqliteStoreNamed:storeName];
     [NSPersistentStoreCoordinator MR_setDefaultStoreCoordinator:coordinator];
     
-    [NSManagedObjectContext MR_initializeDefaultContextWithCoordinator:coordinator];
+    [NSManagedObjectContext MR_initializeContextsWithCoordinator:coordinator];
 }
 
 + (void) setupCoreDataStackWithInMemoryStore;
@@ -50,7 +50,7 @@
 	NSPersistentStoreCoordinator *coordinator = [NSPersistentStoreCoordinator MR_coordinatorWithInMemoryStore];
 	[NSPersistentStoreCoordinator MR_setDefaultStoreCoordinator:coordinator];
 	
-    [NSManagedObjectContext MR_initializeDefaultContextWithCoordinator:coordinator];
+    [NSManagedObjectContext MR_initializeContextsWithCoordinator:coordinator];
 }
 
 @end

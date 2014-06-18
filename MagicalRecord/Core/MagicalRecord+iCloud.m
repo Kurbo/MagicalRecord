@@ -55,7 +55,7 @@ static BOOL _iCloudEnabled = NO;
                                                                                           cloudStorePathComponent:pathSubcomponent
                                                                                                        completion:completion];
     [NSPersistentStoreCoordinator MR_setDefaultStoreCoordinator:coordinator];
-    [NSManagedObjectContext MR_initializeDefaultContextWithCoordinator:coordinator];
+    [NSManagedObjectContext MR_initializeContextsWithCoordinator:coordinator];
 }
 
 @end
