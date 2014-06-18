@@ -76,4 +76,28 @@ static NSPersistentStore *defaultPersistentStore_ = nil;
     return [self MR_urlForStoreName:kMagicalRecordDefaultStoreFileName];
 }
 
++ (BOOL) MR_deleteAllStores
+{
+    NSError *error = nil;
+    NSFileManager *fm = [NSFileManager defaultManager];
+    NSString *directoryPath = [self MR_applicationStorageDirectory];
+    NSArray *contents = [fm contentsOfDirectoryAtPath:directoryPath error:&error];
+    if (error) {
+        return NO;
+    }
+    
+    MRLog(@"Deleting all database files %@", contents);
+    for (NSString *fileName in contents) {
+        if ([[fileName pathExtension] isEqualToString:@"sqlite"]) {
+            NSString *filePath = [directoryPath stringByAppendingPathComponent:fileName];
+            [[NSFileManager defaultManager] removeItemAtPath:filePath error:&error];
+            if (error) {
+                return NO;
+            }
+        }
+    }
+    
+    return YES;
+}
+
 @end
