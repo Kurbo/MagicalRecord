@@ -159,10 +159,11 @@ NSString * const kMagicalRecordDidMergeChangesFromDefaultToWorkerNotification = 
         NSManagedObjectContext *defaultContext = [self MR_newMainQueueContext];
         [self MR_setDefaultContext:defaultContext];
         
-        NSManagedObjectContext *workerContext = [self MR_context];
+        NSManagedObjectContext *workerContext = [self MR_contextWithoutParent];
         [self MR_setWorkerContext:workerContext];
         
         [defaultContext setParentContext:rootContext];
+        [workerContext setParentContext:defaultContext];
     }
 }
 
