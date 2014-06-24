@@ -15,6 +15,8 @@ static id iCloudSetupNotificationObserver = nil;
 
 static NSString * const kMagicalRecordNSManagedObjectContextWorkingName = @"kNSManagedObjectContextWorkingName";
 
+NSString * const kMagicalRecordDidMergeChangesFromDefaultToWorkerNotification = @"kMagicalRecordDidMergeChangesFromDefaultToWorkerNotification";
+
 @interface NSManagedObjectContext (MagicalRecordInternal)
 
 - (void) MR_mergeChangesFromNotification:(NSNotification *)notification;
@@ -260,6 +262,10 @@ static NSString * const kMagicalRecordNSManagedObjectContextWorkingName = @"kNSM
 + (void)defaultContextChanged:(NSNotification *)notification {
     [[self MR_workerContext] performBlock:^{
         [[self MR_workerContext] mergeChangesFromContextDidSaveNotification:notification];
+        NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
+        [notificationCenter postNotificationName:kMagicalRecordDidMergeChangesFromDefaultToWorkerNotification
+                                          object:[self MR_workerContext]
+                                        userInfo:[notification userInfo]];
     }];
 }
 

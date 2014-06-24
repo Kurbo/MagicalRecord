@@ -8,6 +8,7 @@
 #import "MagicalRecord.h"
 
 extern NSString * const kMagicalRecordDidMergeChangesFromiCloudNotification;
+extern NSString * const kMagicalRecordDidMergeChangesFromDefaultToWorkerNotification;
 
 @interface NSManagedObjectContext (MagicalRecord)
 
