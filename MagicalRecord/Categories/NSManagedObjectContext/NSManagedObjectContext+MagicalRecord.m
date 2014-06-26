@@ -63,7 +63,6 @@ NSString * const kMagicalRecordDidMergeChangesFromDefaultToWorkerNotification = 
 {
 	@synchronized (self)
 	{
-        NSAssert(defaultManagedObjectContext_ != nil, @"Default Context is nil! Did you forget to initialize the Core Data Stack?");
         return defaultManagedObjectContext_;
 	}
 }
