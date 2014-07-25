@@ -10,12 +10,9 @@
 
 static NSManagedObjectContext *rootSavingContext = nil;
 static NSManagedObjectContext *defaultManagedObjectContext_ = nil;
-static NSManagedObjectContext *workerManagedObjectContext_ = nil;
 static id iCloudSetupNotificationObserver = nil;
 
 static NSString * const kMagicalRecordNSManagedObjectContextWorkingName = @"kNSManagedObjectContextWorkingName";
-
-NSString * const kMagicalRecordDidMergeChangesFromDefaultToWorkerNotification = @"kMagicalRecordDidMergeChangesFromDefaultToWorkerNotification";
 
 @interface NSManagedObjectContext (MagicalRecordInternal)
 
@@ -33,7 +30,6 @@ NSString * const kMagicalRecordDidMergeChangesFromDefaultToWorkerNotification = 
 
 + (void) MR_cleanUp;
 {
-    [self MR_setWorkerContext:nil];
     [self MR_setDefaultContext:nil];
     [self MR_setRootSavingContext:nil];
 }
@@ -158,11 +154,7 @@ NSString * const kMagicalRecordDidMergeChangesFromDefaultToWorkerNotification = 
         NSManagedObjectContext *defaultContext = [self MR_newMainQueueContext];
         [self MR_setDefaultContext:defaultContext];
         
-        NSManagedObjectContext *workerContext = [self MR_contextWithoutParent];
-        [self MR_setWorkerContext:workerContext];
-        
         [defaultContext setParentContext:rootContext];
-        [workerContext setParentContext:rootContext];
     }
 }
 
@@ -259,45 +251,12 @@ NSString * const kMagicalRecordDidMergeChangesFromDefaultToWorkerNotification = 
     return workingName;
 }
 
-+ (void)defaultContextChanged:(NSNotification *)notification {
-    [[self MR_workerContext] performBlock:^{
-        [[self MR_workerContext] mergeChangesFromContextDidSaveNotification:notification];
-        NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
-        [notificationCenter postNotificationName:kMagicalRecordDidMergeChangesFromDefaultToWorkerNotification
-                                          object:[self MR_workerContext]
-                                        userInfo:[notification userInfo]];
-    }];
-}
-
 + (NSManagedObjectContext *) MR_workerContext
 {
 	@synchronized (self)
 	{
-        return workerManagedObjectContext_;
+        return rootSavingContext;
 	}
-}
-
-+ (void) MR_setWorkerContext:(NSManagedObjectContext *)moc
-{
-    if (workerManagedObjectContext_)
-    {
-        [[NSNotificationCenter defaultCenter] removeObserver:workerManagedObjectContext_];
-    }
-    
-    workerManagedObjectContext_ = moc;
-    [workerManagedObjectContext_ MR_setWorkingName:@"WORKER"];
-    
-    if (workerManagedObjectContext_ == nil) {
-        [[NSNotificationCenter defaultCenter] removeObserver:self name:NSManagedObjectContextDidSaveNotification object:[self MR_defaultContext]];        
-    } else if ([self MR_defaultContext] != nil) {
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(defaultContextChanged:)
-                                                     name:NSManagedObjectContextDidSaveNotification
-                                                   object:[self MR_defaultContext]];
-    }
-    
-    [moc MR_obtainPermanentIDsBeforeSaving];
-    MRLog(@"Set Default Context: %@", workerManagedObjectContext_);
 }
 
 @end
