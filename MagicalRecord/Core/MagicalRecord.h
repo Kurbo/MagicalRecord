@@ -39,14 +39,24 @@ typedef void (^CoreDataBlock)(NSManagedObjectContext *context);
 
 #endif
 
+extern NSString * const kMagicalRecordDidMergeChangesFromiCloudNotification;
+
 @interface MagicalRecord : NSObject
 
-+ (NSString *) currentStack;
++ (instancetype) currentStack;
 
 + (void) cleanUp;
 
 + (void) setDefaultModelFromClass:(Class)klass;
 + (void) setDefaultModelNamed:(NSString *)modelName;
 + (NSString *) defaultStoreName;
+
++ (void)setCurrentStackWithStoreNamed:(NSString *)storeName;
++ (void)setCurrentStackWithAutoMigratingSqliteStoreNamed:(NSString *)storeName;
++ (void)setCurrentStackWithInMemoryStoreNamed:(NSString *)storeName;
+
+@property (nonatomic, strong, readonly) NSManagedObjectContext *mainContext;
+@property (nonatomic, strong, readonly) NSManagedObjectContext *rootSavingContext;
+@property (nonatomic, strong, readonly) NSPersistentStoreCoordinator *coordinator;
 
 @end
