@@ -61,6 +61,33 @@ static NSString * const kMagicalRecordNSManagedObjectContextWorkingName = @"kNSM
     dispatch_async(dispatch_get_main_queue(), resetBlock);
 }
 
++ (NSManagedObjectContext *) MR_contextWithoutParent;
+{
+    NSManagedObjectContext *context = [[self alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
+    return context;
+}
+
++ (NSManagedObjectContext *) MR_context;
+{
+    NSManagedObjectContext *context = [[self alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
+    [context setParentContext:[self MR_defaultContext]];
+    return context;
+}
+
++ (NSManagedObjectContext *) MR_contextWithParent:(NSManagedObjectContext *)parentContext;
+{
+    NSManagedObjectContext *context = [self MR_contextWithoutParent];
+    [context setParentContext:parentContext];
+    return context;
+}
+
++ (NSManagedObjectContext *) MR_newMainQueueContext;
+{
+    NSManagedObjectContext *context = [[self alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];
+    MRLog(@"Created Main Queue Context: %@", context);
+    return context;
+}
+
 - (void) MR_setWorkingName:(NSString *)workingName;
 {
     [[self userInfo] setObject:workingName forKey:kMagicalRecordNSManagedObjectContextWorkingName];
