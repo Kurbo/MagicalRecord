@@ -54,6 +54,8 @@ extern NSString * const kMagicalRecordDidMergeChangesFromiCloudNotification;
 + (void)setCurrentStackWithStoreNamed:(NSString *)storeName;
 + (void)setCurrentStackWithAutoMigratingSqliteStoreNamed:(NSString *)storeName;
 + (void)setCurrentStackWithInMemoryStoreNamed:(NSString *)storeName;
++ (void)setCurrentStackWithiCloudContainer:(NSString *)containerID contentNameKey:(NSString *)contentNameKey
+                           localStoreNamed:(NSString *)localStoreName cloudStorePathComponent:(NSString *)pathSubcomponent completion:(void(^)(void))completion;
 
 @property (nonatomic, strong, readonly) NSManagedObjectContext *mainContext;
 @property (nonatomic, strong, readonly) NSManagedObjectContext *rootSavingContext;

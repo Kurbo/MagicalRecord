@@ -49,13 +49,11 @@ static BOOL _iCloudEnabled = NO;
 
 + (void) setupCoreDataStackWithiCloudContainer:(NSString *)containerID contentNameKey:(NSString *)contentNameKey localStoreNamed:(NSString *)localStoreName cloudStorePathComponent:(NSString *)pathSubcomponent completion:(void(^)(void))completion;
 {
-    NSPersistentStoreCoordinator *coordinator = [NSPersistentStoreCoordinator MR_coordinatorWithiCloudContainerID:containerID
-                                                                                                   contentNameKey:contentNameKey 
-                                                                                                  localStoreNamed:localStoreName 
-                                                                                          cloudStorePathComponent:pathSubcomponent
-                                                                                                       completion:completion];
-    [NSPersistentStoreCoordinator MR_setDefaultStoreCoordinator:coordinator];
-    [NSManagedObjectContext MR_initializeDefaultContextWithCoordinator:coordinator];
+    [self setCurrentStackWithiCloudContainer:containerID
+                              contentNameKey:contentNameKey
+                             localStoreNamed:localStoreName
+                     cloudStorePathComponent:pathSubcomponent
+                                  completion:completion];
 }
 
 @end

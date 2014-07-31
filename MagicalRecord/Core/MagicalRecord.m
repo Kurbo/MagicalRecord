@@ -66,6 +66,18 @@ static id iCloudSetupNotificationObserver = nil;
     }
 }
 
++ (void)setCurrentStackWithiCloudContainer:(NSString *)containerID contentNameKey:(NSString *)contentNameKey
+                           localStoreNamed:(NSString *)localStoreName cloudStorePathComponent:(NSString *)pathSubcomponent completion:(void(^)(void))completion;
+{
+    MagicalRecord *stack = [[[self class] stackDictionary] objectForKey:localStoreName];
+    if (!stack) {
+        stack = [[self alloc] initWithiCloudContainer:containerID contentNameKey:contentNameKey
+                                      localStoreNamed:localStoreName cloudStorePathComponent:pathSubcomponent
+                                           completion:completion];
+        [self setCurrentStack:stack];
+    }
+}
+
 - (id)initStoreWithName:(NSString *)storeName
 {
     self = [super init];
@@ -95,6 +107,23 @@ static id iCloudSetupNotificationObserver = nil;
     {
         self.coordinator = [NSPersistentStoreCoordinator MR_coordinatorWithInMemoryStore];
         [self commonInitWithStoreName:storeName];
+    }
+    return self;
+}
+
+- (id)initWithiCloudContainer:(NSString *)containerID contentNameKey:(NSString *)contentNameKey
+              localStoreNamed:(NSString *)localStoreName cloudStorePathComponent:(NSString *)pathSubcomponent
+                   completion:(void(^)(void))completion
+{
+    self = [super init];
+    if (self)
+    {
+        self.coordinator = [NSPersistentStoreCoordinator MR_coordinatorWithiCloudContainerID:containerID
+                                                                              contentNameKey:contentNameKey
+                                                                             localStoreNamed:localStoreName
+                                                                     cloudStorePathComponent:pathSubcomponent
+                                                                                  completion:completion];
+        [self commonInitWithStoreName:localStoreName];
     }
     return self;
 }
