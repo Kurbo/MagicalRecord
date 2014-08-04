@@ -16,7 +16,6 @@
     #endif
 
     #import "MagicalRecord.h"
-    #import "MagicalRecord+Actions.h"
     #import "MagicalRecord+ErrorHandling.h"
     #import "MagicalRecord+Options.h"
     #import "MagicalRecord+ShorthandSupport.h"

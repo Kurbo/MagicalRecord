@@ -132,6 +132,7 @@ static id iCloudSetupNotificationObserver = nil;
 {
     self.rootSavingContext = [self contextWithStoreCoordinator:self.coordinator];
     self.mainContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];
+    self.mainContext.parentContext = self.rootSavingContext;
     
     [[[self class] stackDictionary] setObject:self forKey:storeName];
     if ([[self class] currentStack] == nil) {
