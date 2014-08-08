@@ -7,10 +7,10 @@
 
 #import "CoreData+MagicalRecord.h"
 
+NSString * const kMagicalRecordNSManagedObjectContextDidMergeChangesFromRootContext = @"kMagicalRecordNSManagedObjectContextDidMergeChangesToMainContext";
+
 static MagicalRecord *currentStack_ = nil;
-
 static id iCloudSetupNotificationObserver = nil;
-
 
 @interface MagicalRecord (Internal)
 
@@ -163,13 +163,13 @@ static id iCloudSetupNotificationObserver = nil;
     }
     
     _rootSavingContext = context;
-    [self MR_obtainPermanentIDsBeforeSaving];
+    [self obtainPermanentIDsBeforeSaving];
     [_rootSavingContext setMergePolicy:NSMergeByPropertyObjectTrumpMergePolicy];
     [_rootSavingContext MR_setWorkingName:@"BACKGROUND SAVING (ROOT)"];
     MRLog(@"Set Root Saving Context: %@", _rootSavingContext);
 }
 
-- (void) MR_setMainContext:(NSManagedObjectContext *)moc
+- (void) setMainContext:(NSManagedObjectContext *)moc
 {
     if (_mainContext)
     {
@@ -201,7 +201,7 @@ static id iCloudSetupNotificationObserver = nil;
                                                    object:self.rootSavingContext];
     }
     
-    [self MR_obtainPermanentIDsBeforeSaving];
+    [self obtainPermanentIDsBeforeSaving];
     if ([MagicalRecord isICloudEnabled])
     {
         [_mainContext MR_observeiCloudChangesInCoordinator:coordinator];
@@ -230,10 +230,11 @@ static id iCloudSetupNotificationObserver = nil;
     }
     
     [self.mainContext mergeChangesFromContextDidSaveNotification:notification];
+    [[NSNotificationCenter defaultCenter] postNotificationName:kMagicalRecordNSManagedObjectContextDidMergeChangesFromRootContext object:self.mainContext userInfo:nil];
 }
 
 
-- (void) MR_contextWillSave:(NSNotification *)notification
+- (void) contextWillSave:(NSNotification *)notification
 {
     NSManagedObjectContext *context = [notification object];
     NSSet *insertedObjects = [context insertedObjects];
@@ -260,10 +261,10 @@ static id iCloudSetupNotificationObserver = nil;
     return nil;
 }
 
-- (void) MR_obtainPermanentIDsBeforeSaving;
+- (void) obtainPermanentIDsBeforeSaving;
 {
     [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(MR_contextWillSave:)
+                                             selector:@selector(contextWillSave:)
                                                  name:NSManagedObjectContextWillSaveNotification
                                                object:self];
     
