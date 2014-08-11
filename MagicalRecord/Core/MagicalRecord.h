@@ -40,7 +40,7 @@ typedef void (^CoreDataBlock)(NSManagedObjectContext *context);
 #endif
 
 extern NSString * const kMagicalRecordDidMergeChangesFromiCloudNotification;
-extern NSString * const kMagicalRecordNSManagedObjectContextDidMergeChangesFromRootContext;
+extern NSString * const kMagicalRecordDidMergeChangesFromDefaultToWorkerNotification;
 
 @interface MagicalRecord : NSObject
 

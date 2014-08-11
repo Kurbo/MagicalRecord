@@ -7,7 +7,7 @@
 
 #import "CoreData+MagicalRecord.h"
 
-NSString * const kMagicalRecordNSManagedObjectContextDidMergeChangesFromRootContext = @"kMagicalRecordNSManagedObjectContextDidMergeChangesToMainContext";
+NSString * const kMagicalRecordDidMergeChangesFromDefaultToWorkerNotification = @"kMagicalRecordDidMergeChangesFromDefaultToWorkerNotification";
 
 static MagicalRecord *currentStack_ = nil;
 static id iCloudSetupNotificationObserver = nil;
@@ -21,6 +21,7 @@ static id iCloudSetupNotificationObserver = nil;
 @interface MagicalRecord ()
 
 @property (nonatomic, strong) NSManagedObjectContext *mainContext;
+@property (nonatomic, strong) NSManagedObjectContext *workerContext;
 @property (nonatomic, strong) NSManagedObjectContext *rootSavingContext;
 @property (nonatomic, strong) NSPersistentStoreCoordinator *coordinator;
 
@@ -133,6 +134,8 @@ static id iCloudSetupNotificationObserver = nil;
     self.rootSavingContext = [self contextWithStoreCoordinator:self.coordinator];
     self.mainContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];
     self.mainContext.parentContext = self.rootSavingContext;
+    self.workerContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
+    self.workerContext.parentContext = self.mainContext;
     
     [[[self class] stackDictionary] setObject:self forKey:storeName];
     if ([[self class] currentStack] == nil) {
@@ -230,7 +233,6 @@ static id iCloudSetupNotificationObserver = nil;
     }
     
     [self.mainContext mergeChangesFromContextDidSaveNotification:notification];
-    [[NSNotificationCenter defaultCenter] postNotificationName:kMagicalRecordNSManagedObjectContextDidMergeChangesFromRootContext object:self.mainContext userInfo:nil];
 }
 
 
@@ -249,6 +251,39 @@ static id iCloudSetupNotificationObserver = nil;
             [MagicalRecord handleErrors:error];
         }
     }
+}
+
+- (void)defaultContextChanged:(NSNotification *)notification {
+    [self.workerContext performBlock:^{
+        [self.workerContext mergeChangesFromContextDidSaveNotification:notification];
+        NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
+        [notificationCenter postNotificationName:kMagicalRecordDidMergeChangesFromDefaultToWorkerNotification
+                                          object:self.workerContext
+                                        userInfo:[notification userInfo]];
+    }];
+}
+
+- (void) setWorkerContext:(NSManagedObjectContext *)moc
+{
+    if (_workerContext)
+    {
+        [[NSNotificationCenter defaultCenter] removeObserver:_workerContext];
+    }
+    
+    _workerContext = moc;
+    [_workerContext MR_setWorkingName:@"WORKER"];
+    
+    if (_workerContext == nil) {
+        [[NSNotificationCenter defaultCenter] removeObserver:self name:NSManagedObjectContextDidSaveNotification object:self.workerContext];
+    } else if (self.mainContext != nil) {
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(defaultContextChanged:)
+                                                     name:NSManagedObjectContextDidSaveNotification
+                                                   object:self.mainContext];
+    }
+    
+    [self obtainPermanentIDsBeforeSaving];
+    MRLog(@"Set Worker Context: %@", _workerContext);
 }
 
 - (NSPersistentStore *)persistentStore
@@ -336,7 +371,6 @@ static id iCloudSetupNotificationObserver = nil;
 
     return defaultName;
 }
-
 
 #pragma mark - initialize
 
