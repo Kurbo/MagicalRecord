@@ -60,6 +60,7 @@ extern NSString * const kMagicalRecordDidMergeChangesFromDefaultToWorkerNotifica
 
 @property (nonatomic, strong, readonly) NSManagedObjectContext *mainContext;
 @property (nonatomic, strong, readonly) NSManagedObjectContext *rootSavingContext;
+@property (nonatomic, strong, readonly) NSManagedObjectContext *workerContext;
 @property (nonatomic, strong, readonly) NSPersistentStoreCoordinator *coordinator;
 
 @end

@@ -52,6 +52,11 @@ static NSString * const kMagicalRecordNSManagedObjectContextWorkingName = @"kNSM
     return [[MagicalRecord currentStack] rootSavingContext];
 }
 
++ (NSManagedObjectContext *) MR_workerContext;
+{
+    return [[MagicalRecord currentStack] workerContext];
+}
+
 + (void) MR_resetDefaultContext
 {
     void (^resetBlock)(void) = ^{
