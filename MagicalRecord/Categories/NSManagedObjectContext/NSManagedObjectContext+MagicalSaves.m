@@ -107,6 +107,45 @@
     }
 }
 
+- (void) MR_performBlockAndSave:(void (^)())block completion:(MRSaveCompletionHandler)completion;
+{
+    [self performBlock:^{
+        block();
+        if (![self hasChanges]) {
+            MRLog(@"NO CHANGES IN ** %@ ** CONTEXT - NOT SAVING", [self MR_workingName]);
+            
+            if (completion)
+            {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    completion(NO, nil);
+                });
+            }
+            
+            return;
+        }
+        
+        MRLog(@"→ Saving %@", [self MR_description]);
+        
+        NSError *error = nil;
+        BOOL     saved = NO;
+        
+        saved = [self save:&error];
+        
+        if (error) {
+            MRLog(@"Unable to perform save: %@", [error userInfo]);
+            [MagicalRecord handleErrors:error];
+        } else {
+            MRLog(@"→ Finished saving: %@", [self MR_description]);
+        }
+        
+        if (completion) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                completion(saved, error);
+            });
+        }
+    }];
+}
+
 #pragma mark - Deprecated methods
 // These methods will be removed in MagicalRecord 3.0
 

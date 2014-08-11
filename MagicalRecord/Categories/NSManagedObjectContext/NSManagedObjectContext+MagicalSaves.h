@@ -39,8 +39,9 @@ typedef void (^MRSaveCompletionHandler)(BOOL success, NSError *error);
 /// \param       mask        bitmasked options for the save process
 /// \param       completion  Completion block that is called after the save has completed. The block is passed a success state as a `BOOL` and an `NSError` instance if an error occurs. Always called on the main queue.
 /// \discussion  All other save methods are conveniences to this method.
- - (void) MR_saveWithOptions:(MRSaveContextOptions)mask completion:(MRSaveCompletionHandler)completion;
+- (void) MR_saveWithOptions:(MRSaveContextOptions)mask completion:(MRSaveCompletionHandler)completion;
 
+- (void) MR_performBlockAndSave:(void (^)())block completion:(MRSaveCompletionHandler)completion;
 
 /* DEPRECATION NOTICE:
  * The following methods are deprecated, but remain in place for backwards compatibility until the next major version (3.x)
