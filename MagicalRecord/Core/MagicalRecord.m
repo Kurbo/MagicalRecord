@@ -45,8 +45,8 @@ static id iCloudSetupNotificationObserver = nil;
     MagicalRecord *stack = [[[self class] stackDictionary] objectForKey:storeName];
     if (!stack) {
         stack = [[self alloc] initStoreWithName:storeName];
-        [self setCurrentStack:stack];
     }
+    [self setCurrentStack:stack];
 }
 
 + (void)setCurrentStackWithAutoMigratingSqliteStoreNamed:(NSString *)storeName
@@ -54,8 +54,8 @@ static id iCloudSetupNotificationObserver = nil;
     MagicalRecord *stack = [[[self class] stackDictionary] objectForKey:storeName];
     if (!stack) {
         stack = [[self alloc] initAutoMigratingStoreWithName:storeName];
-        [self setCurrentStack:stack];
     }
+    [self setCurrentStack:stack];
 }
 
 + (void)setCurrentStackWithInMemoryStoreNamed:(NSString *)storeName
@@ -63,8 +63,8 @@ static id iCloudSetupNotificationObserver = nil;
     MagicalRecord *stack = [[[self class] stackDictionary] objectForKey:storeName];
     if (!stack) {
         stack = [[self alloc] initAutoMigratingStoreWithName:storeName];
-        [self setCurrentStack:stack];
     }
+    [self setCurrentStack:stack];
 }
 
 + (void)setCurrentStackWithiCloudContainer:(NSString *)containerID contentNameKey:(NSString *)contentNameKey
@@ -75,8 +75,8 @@ static id iCloudSetupNotificationObserver = nil;
         stack = [[self alloc] initWithiCloudContainer:containerID contentNameKey:contentNameKey
                                       localStoreNamed:localStoreName cloudStorePathComponent:pathSubcomponent
                                            completion:completion];
-        [self setCurrentStack:stack];
     }
+    [self setCurrentStack:stack];
 }
 
 - (id)initStoreWithName:(NSString *)storeName
