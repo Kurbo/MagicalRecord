@@ -166,7 +166,7 @@ static id iCloudSetupNotificationObserver = nil;
     }
     
     _rootSavingContext = context;
-    [self obtainPermanentIDsBeforeSaving];
+    [self obtainPermanentIDsBeforeSaving:_rootSavingContext];
     [_rootSavingContext setMergePolicy:NSMergeByPropertyObjectTrumpMergePolicy];
     [_rootSavingContext MR_setWorkingName:@"BACKGROUND SAVING (ROOT)"];
     MRLog(@"Set Root Saving Context: %@", _rootSavingContext);
@@ -204,7 +204,7 @@ static id iCloudSetupNotificationObserver = nil;
                                                    object:self.rootSavingContext];
     }
     
-    [self obtainPermanentIDsBeforeSaving];
+    [self obtainPermanentIDsBeforeSaving:_mainContext];
     if ([MagicalRecord isICloudEnabled])
     {
         [_mainContext MR_observeiCloudChangesInCoordinator:coordinator];
@@ -282,7 +282,7 @@ static id iCloudSetupNotificationObserver = nil;
                                                    object:self.mainContext];
     }
     
-    [self obtainPermanentIDsBeforeSaving];
+    [self obtainPermanentIDsBeforeSaving:_workerContext];
     MRLog(@"Set Worker Context: %@", _workerContext);
 }
 
@@ -296,12 +296,12 @@ static id iCloudSetupNotificationObserver = nil;
     return nil;
 }
 
-- (void) obtainPermanentIDsBeforeSaving;
+- (void) obtainPermanentIDsBeforeSaving:(NSManagedObjectContext *)context;
 {
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(contextWillSave:)
                                                  name:NSManagedObjectContextWillSaveNotification
-                                               object:self];
+                                               object:context];
     
     
 }
