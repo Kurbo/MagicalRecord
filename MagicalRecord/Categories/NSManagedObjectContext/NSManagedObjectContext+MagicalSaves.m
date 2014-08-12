@@ -109,41 +109,55 @@
 
 - (void) MR_performBlockAndSave:(void (^)())block completion:(MRSaveCompletionHandler)completion;
 {
-    [self performBlock:^{
-        block();
-        if (![self hasChanges]) {
-            MRLog(@"NO CHANGES IN ** %@ ** CONTEXT - NOT SAVING", [self MR_workingName]);
-            
-            if (completion)
-            {
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    completion(NO, nil);
-                });
-            }
-            
-            return;
-        }
-        
-        MRLog(@"→ Saving %@", [self MR_description]);
-        
+    id saveBlock = ^{
         NSError *error = nil;
         BOOL     saved = NO;
         
-        saved = [self save:&error];
-        
-        if (error) {
-            MRLog(@"Unable to perform save: %@", [error userInfo]);
-            [MagicalRecord handleErrors:error];
-        } else {
-            MRLog(@"→ Finished saving: %@", [self MR_description]);
+        @try
+        {
+            block();
+            
+            MRLog(@"→ Saving %@", [self MR_description]);
+            MRLog(@"→ Save Parents? %@", @(YES));
+            
+            saved = [self save:&error];
+        }
+        @catch(NSException *exception)
+        {
+            MRLog(@"Unable to perform save: %@", (id)[exception userInfo] ? : (id)[exception reason]);
         }
         
-        if (completion) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                completion(saved, error);
-            });
+        @finally
+        {
+            if (!saved) {
+                [MagicalRecord handleErrors:error];
+                
+                if (completion) {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        completion(saved, error);
+                    });
+                }
+            } else {
+                // If we're the default context, save to disk too (the user expects it to persist)
+                
+                if ([self parentContext]) {
+                    [[self parentContext] MR_saveWithOptions:MRSaveParentContexts completion:completion];
+                }
+                // If we should not save the parent context, or there is not a parent context to save (root context), call the completion block
+                else {
+                    MRLog(@"→ Finished saving: %@", [self MR_description]);
+                    
+                    if (completion) {
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                            completion(saved, error);
+                        });
+                    }
+                }
+            }
         }
-    }];
+    };
+    
+    [self performBlock:saveBlock];
 }
 
 #pragma mark - Deprecated methods
