@@ -1,7 +1,13 @@
 // DO NOT EDIT. This file is machine-generated and constantly overwritten.
 // Make changes to SingleEntityWithNoRelationships.h instead.
 
+#import <Foundation/Foundation.h>
+#if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
+#import <UIKit/UIKit.h>
 #import <CoreData/CoreData.h>
+#else
+#import <Cocoa/Cocoa.h>
+#endif
 
 extern const struct SingleEntityWithNoRelationshipsAttributes {
 	__unsafe_unretained NSString *booleanAsStringTestAttribute;
@@ -42,9 +48,9 @@ extern const struct SingleEntityWithNoRelationshipsAttributes {
 //- (BOOL)validateBooleanTestAttribute:(id*)value_ error:(NSError**)error_;
 
 #if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
-@property (nonatomic, strong) UIColor* colorTestAttribute;
+@property (nonatomic, strong) UIColor *colorTestAttribute;
 #else
-@property (nonatomic, strong) NSColor* colorTestAttribute;
+@property (nonatomic, strong) NSColor *colorTestAttribute;
 #endif
 
 //- (BOOL)validateColorTestAttribute:(id*)value_ error:(NSError**)error_;
@@ -119,12 +125,12 @@ extern const struct SingleEntityWithNoRelationshipsAttributes {
 - (NSNumber*)primitiveBooleanTestAttribute;
 - (void)setPrimitiveBooleanTestAttribute:(NSNumber*)value;
 
-#if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
-- (UIColor*)primitiveColorTestAttribute;
-- (void)setPrimitiveColorTestAttribute:(UIColor*)value;
+#if TARGET_OS_IPHONE
+- (UIColor *)primitiveColorTestAttribute;
+- (void)setPrimitiveColorTestAttribute:(UIColor *)value;
 #else
-- (NSColor*)primitiveColorTestAttribute;
-- (void)setPrimitiveColorTestAttribute:(NSColor*)value;
+- (NSColor *)primitiveColorTestAttribute;
+- (void)setPrimitiveColorTestAttribute:(NSColor *)value;
 #endif
 
 - (NSDate*)primitiveDateTestAttribute;

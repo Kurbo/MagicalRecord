@@ -18,3 +18,9 @@ profile
 *.moved-aside
 
 DerivedData
+Carthage/Build
+
+*.gcno
+*.gcda
+
+MagicalRecord.framework.zip

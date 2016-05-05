@@ -16,17 +16,13 @@
 
 @implementation NSManagedObjectContextHelperTests
 
-- (void) setUp
-{
-    [super setUp];
-
-    [MagicalRecord setupCoreDataStackWithInMemoryStore];
-}
-
 - (void) testCanCreateContextForCurrentThead
 {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
     NSManagedObjectContext *firstContext = [NSManagedObjectContext MR_contextForCurrentThread];
     NSManagedObjectContext *secondContext = [NSManagedObjectContext MR_contextForCurrentThread];
+#pragma clang diagnostic pop
 
     XCTAssertEqualObjects(firstContext, secondContext, @"Contexts should be equal");
 }
@@ -41,7 +37,7 @@
 - (void) testThatSavedObjectsHavePermanentIDs
 {
     NSManagedObjectContext *context = [NSManagedObjectContext MR_defaultContext];
-    SingleEntityWithNoRelationships *entity = [SingleEntityWithNoRelationships MR_createInContext:context];
+    SingleEntityWithNoRelationships *entity = [SingleEntityWithNoRelationships MR_createEntityInContext:context];
 
     XCTAssertTrue([[entity objectID] isTemporaryID], @"Entity should have a temporary ID before saving");
     [context MR_saveOnlySelfAndWait];
